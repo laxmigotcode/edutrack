@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="A modern, responsive student registration and management portal built with vanilla HTML, CSS, and JavaScript.">
+  <title>EduTrack — Student Registration Portal</title>
+  
+  <!-- CSS Stylesheets (Base layout and reusable components) -->
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/components.css">
+</head>
+<body>
+
+  <!-- Top Application Header -->
+  <header class="app-header">
+    <div class="header-container">
+      <div class="brand">
+        <div class="brand-icon" aria-hidden="true">🎓</div>
+        <div>
+          <h1 class="brand-title">EduTrack</h1>
+          <p class="brand-subtitle">Student Registration & Records System</p>
+        </div>
+      </div>
+      
+      <!-- Primary Navigation Tabs -->
+      <nav class="nav-tabs" aria-label="Main Navigation">
+        <button type="button" class="tab-btn active" id="tabRegisterBtn" data-target="registrationSection" aria-selected="true" role="tab">
+          <span aria-hidden="true">📝</span> Register
+        </button>
+        <button type="button" class="tab-btn" id="tabDirectoryBtn" data-target="directorySection" aria-selected="false" role="tab">
+          <span aria-hidden="true">📋</span> Directory
+          <span class="badge" id="navStudentCount">0</span>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Main Application Content Area -->
+  <main class="main-container">
+
+    <!-- Quick Statistics & Action Bar -->
+    <section class="stats-section" aria-label="System Overview Statistics">
+      <div class="stat-card">
+        <span class="stat-icon" aria-hidden="true">👥</span>
+        <div class="stat-info">
+          <div class="stat-value" id="statTotalStudents">0</div>
+          <div class="stat-label">Total Students</div>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <span class="stat-icon" aria-hidden="true">🏛️</span>
+        <div class="stat-info">
+          <div class="stat-value" id="statDepartmentsCount">0</div>
+          <div class="stat-label">Active Departments</div>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <span class="stat-icon" aria-hidden="true">⭐</span>
+        <div class="stat-info">
+          <div class="stat-value" id="statNewestStudent">—</div>
+          <div class="stat-label">Latest Registration</div>
+        </div>
+      </div>
+
+      <!-- Quick Actions (Seed Demo Data & CSV Export) -->
+      <div class="stat-card actions-card">
+        <button type="button" class="btn btn-secondary btn-sm" id="seedDemoDataBtn" title="Fill with sample student records for testing">
+          <span aria-hidden="true">⚡</span> Load Sample Data
+        </button>
+        <button type="button" class="btn btn-secondary btn-sm" id="exportCsvBtn" title="Download current records as CSV spreadsheet">
+          <span aria-hidden="true">📥</span> Export to CSV
+        </button>
+      </div>
+    </section>
+
+    <!-- TAB 1: Student Registration Form Section -->
+    <section id="registrationSection" class="content-section active" role="tabpanel" aria-labelledby="tabRegisterBtn">
+      <div class="card form-card">
+        
+        <div class="form-header">
+          <div>
+            <h2 id="formHeading">New Student Registration</h2>
+            <p class="section-desc" id="formSubheading">Fill in the fields below to register a student into the system.</p>
+          </div>
+          <!-- Edit Mode Cancel Banner (Hidden by default) -->
+          <div id="editModeNotice" class="edit-badge-banner" style="display: none;">
+            <span>Editing Student: <strong id="editingStudentName"></strong></span>
+            <button type="button" class="btn btn-outline btn-xs" id="cancelEditBtn">Cancel Edit</button>
+          </div>
+        </div>
+
+        <!-- Registration HTML Form -->
+        <form id="studentForm" novalidate autocomplete="off">
+          
+          <!-- Hidden field to track student ID during edit mode -->
+          <input type="hidden" id="editStudentOriginalId" value="">
+
+          <!-- Grid layout: Left/Center for inputs, Right for Photo Upload -->
+          <div class="form-layout-grid">
+            
+            <!-- Left & Center Columns: Text & Select Inputs -->
+            <div class="form-inputs-group">
+              
+              <div class="form-row">
+                <!-- Full Name -->
+                <div class="form-group">
+                  <label for="fullName">Full Name <span class="required">*</span></label>
+                  <input 
+                    type="text" 
+                    id="fullName" 
+                    name="fullName" 
+                    placeholder="e.g. Maya Sharma"
+                    required
+                    aria-describedby="fullNameError"
+                  >
+                  <div class="field-error" id="fullNameError" role="alert"></div>
+                </div>
+
+                <!-- Student Roll / ID Number -->
+                <div class="form-group">
+                  <label for="studentId">Student ID / Roll No <span class="required">*</span></label>
+                  <input 
+                    type="text" 
+                    id="studentId" 
+                    name="studentId" 
+                    placeholder="e.g. STU-2026-001"
+                    required
+                    aria-describedby="studentIdError"
+                  >
+                  <div class="field-error" id="studentIdError" role="alert"></div>
+                </div>
+              </div>
+
+              <div class="form-row">
+                <!-- Email Address -->
+                <div class="form-group">
+                  <label for="email">Email Address <span class="required">*</span></label>
+                  <input 
+                    type="email" 
+                    id="email" 
+                    name="email" 
+                    placeholder="e.g. maya.sharma@example.edu"
+                    required
+                    aria-describedby="emailError"
+                  >
+                  <div class="field-error" id="emailError" role="alert"></div>
+                </div>
+
+                <!-- Phone Number -->
+                <div class="form-group">
+                  <label for="phone">Phone Number <span class="required">*</span></label>
+                  <input 
+                    type="tel" 
+                    id="phone" 
+                    name="phone" 
+                    placeholder="e.g. 9876543210"
+                    required
+                    aria-describedby="phoneError"
+                  >
+                  <div class="field-error" id="phoneError" role="alert"></div>
+                </div>
+              </div>
+
+              <div class="form-row">
+                <!-- Department / Course -->
+                <div class="form-group">
+                  <label for="department">Department / Course <span class="required">*</span></label>
+                  <select id="department" name="department" required aria-describedby="departmentError">
+                    <option value="">-- Select Department --</option>
+                    <option value="Computer Science">Computer Science</option>
+                    <option value="Data Science & AI">Data Science & AI</option>
+                    <option value="Business Administration">Business Administration</option>
+                    <option value="Electrical Engineering">Electrical Engineering</option>
+                    <option value="Mechanical Engineering">Mechanical Engineering</option>
+                    <option value="Graphic & UI Design">Graphic & UI Design</option>
+                  </select>
+                  <div class="field-error" id="departmentError" role="alert"></div>
+                </div>
+
+                <!-- Academic Year -->
+                <div class="form-group">
+                  <label for="academicYear">Academic Year <span class="required">*</span></label>
+                  <select id="academicYear" name="academicYear" required aria-describedby="academicYearError">
+                    <option value="">-- Select Year --</option>
+                    <option value="1st Year">1st Year (Freshman)</option>
+                    <option value="2nd Year">2nd Year (Sophomore)</option>
+                    <option value="3rd Year">3rd Year (Junior)</option>
+                    <option value="4th Year">4th Year (Senior)</option>
+                  </select>
+                  <div class="field-error" id="academicYearError" role="alert"></div>
+                </div>
+              </div>
+
+              <div class="form-row">
+                <!-- Date of Birth -->
+                <div class="form-group">
+                  <label for="dob">Date of Birth <span class="required">*</span></label>
+                  <input 
+                    type="date" 
+                    id="dob" 
+                    name="dob" 
+                    required
+                    aria-describedby="dobError"
+                  >
+                  <div class="field-error" id="dobError" role="alert"></div>
+                </div>
+
+                <!-- Gender -->
+                <div class="form-group">
+                  <label for="gender">Gender <span class="required">*</span></label>
+                  <select id="gender" name="gender" required aria-describedby="genderError">
+                    <option value="">-- Select Gender --</option>
+                    <option value="Female">Female</option>
+                    <option value="Male">Male</option>
+                    <option value="Non-Binary">Non-Binary</option>
+                    <option value="Prefer not to say">Prefer not to say</option>
+                  </select>
+                  <div class="field-error" id="genderError" role="alert"></div>
+                </div>
+              </div>
+
+              <!-- Address / Notes -->
+              <div class="form-group">
+                <label for="address">Address / Notes <span class="optional-tag">(Optional)</span></label>
+                <textarea 
+                  id="address" 
+                  name="address" 
+                  rows="2" 
+                  placeholder="Street address, city, or special notes..."
+                ></textarea>
+              </div>
+
+            </div>
+
+            <!-- Right Column: Profile Picture Upload & Live Preview -->
+            <div class="form-photo-upload">
+              <label class="photo-upload-label">Student Photo <span class="optional-tag">(Optional)</span></label>
+              
+              <div class="avatar-preview-box">
+                <img 
+                  id="avatarPreviewImg" 
+                  src="assets/default-avatar.svg" 
+                  alt="Student photo preview" 
+                  class="preview-image"
+                >
+              </div>
+
+              <div class="photo-buttons">
+                <label for="photoInput" class="btn btn-secondary btn-sm upload-file-btn">
+                  <span aria-hidden="true">📁</span> Choose Photo
+                </label>
+                <input 
+                  type="file" 
+                  id="photoInput" 
+                  accept="image/png, image/jpeg, image/webp" 
+                  class="sr-only"
+                >
+                <button type="button" class="btn btn-ghost btn-sm" id="removePhotoBtn" style="display: none;">
+                  Remove
+                </button>
+              </div>
+              <p class="photo-hint">Supported formats: JPG, PNG, WEBP (Max 2MB).</p>
+            </div>
+
+          </div>
+
+          <!-- Form Action Buttons -->
+          <div class="form-actions">
+            <button type="button" class="btn btn-secondary" id="resetFormBtn">
+              Clear Form
+            </button>
+            <button type="submit" class="btn btn-primary" id="submitBtn">
+              <span aria-hidden="true">✅</span> Register Student
+            </button>
+          </div>
+
+        </form>
+      </div>
+    </section>
+
+    <!-- TAB 2: Student Directory & Search/Filter Section -->
+    <section id="directorySection" class="content-section" role="tabpanel" aria-labelledby="tabDirectoryBtn">
+      
+      <div class="card directory-card">
+        
+        <!-- Search and Filter Controls -->
+        <div class="directory-toolbar">
+          <div class="search-box">
+            <span class="search-icon" aria-hidden="true">🔍</span>
+            <input 
+              type="search" 
+              id="searchInput" 
+              placeholder="Search by student name, ID, or email..." 
+              aria-label="Search students"
+            >
+          </div>
+
+          <div class="filter-controls">
+            <!-- Filter by Department -->
+            <select id="filterDepartment" aria-label="Filter by department">
+              <option value="">All Departments</option>
+              <option value="Computer Science">Computer Science</option>
+              <option value="Data Science & AI">Data Science & AI</option>
+              <option value="Business Administration">Business Administration</option>
+              <option value="Electrical Engineering">Electrical Engineering</option>
+              <option value="Mechanical Engineering">Mechanical Engineering</option>
+              <option value="Graphic & UI Design">Graphic & UI Design</option>
+            </select>
+
+            <!-- Filter by Year -->
+            <select id="filterYear" aria-label="Filter by academic year">
+              <option value="">All Years</option>
+              <option value="1st Year">1st Year</option>
+              <option value="2nd Year">2nd Year</option>
+              <option value="3rd Year">3rd Year</option>
+              <option value="4th Year">4th Year</option>
+            </select>
+
+            <button type="button" class="btn btn-ghost btn-sm" id="resetFiltersBtn" title="Reset search and filters">
+              Reset Filters
+            </button>
+          </div>
+        </div>
+
+        <!-- Student Data Table Container -->
+        <div class="table-responsive">
+          <table class="students-table">
+            <thead>
+              <tr>
+                <th scope="col">Student</th>
+                <th scope="col">Student ID</th>
+                <th scope="col">Department</th>
+                <th scope="col">Year</th>
+                <th scope="col">Contact</th>
+                <th scope="col">Registered</th>
+                <th scope="col" class="text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="studentTableBody">
+              <!-- Dynamically populated by app.js -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Empty State Message (Visible when no students match filters) -->
+        <div id="emptyState" class="empty-state" style="display: none;">
+          <div class="empty-icon" aria-hidden="true">🎓</div>
+          <h3 id="emptyStateTitle">No Students Registered Yet</h3>
+          <p id="emptyStateDescription">Get started by registering your first student or clicking "Load Sample Data" above.</p>
+          <button type="button" class="btn btn-primary btn-sm" id="emptyStateActionBtn">
+            Register a Student Now
+          </button>
+        </div>
+
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- Modal: Student Full Profile Details -->
+  <dialog id="studentModal" class="modal" aria-labelledby="modalStudentName">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="modalTitle">Student Profile</h3>
+        <button type="button" class="close-btn" id="closeModalBtn" aria-label="Close dialog">&times;</button>
+      </div>
+      
+      <div class="modal-body" id="modalStudentDetails">
+        <!-- Dynamically rendered by app.js -->
+      </div>
+      
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" id="modalCloseFooterBtn">Close</button>
+        <button type="button" class="btn btn-primary" id="modalEditBtn">Edit Profile</button>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- Modal: Delete Confirmation Dialog -->
+  <dialog id="deleteConfirmModal" class="modal" aria-labelledby="deleteModalTitle">
+    <div class="modal-card modal-confirm">
+      <div class="modal-header">
+        <h3 id="deleteModalTitle">Delete Student Record</h3>
+        <button type="button" class="close-btn" id="closeDeleteModalBtn" aria-label="Close dialog">&times;</button>
+      </div>
+      
+      <div class="modal-body">
+        <p>Are you sure you want to delete <strong id="deleteTargetStudentName"></strong> (<span id="deleteTargetStudentId"></span>)?</p>
+        <p class="warning-text">This action cannot be undone.</p>
+      </div>
+      
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" id="cancelDeleteBtn">Cancel</button>
+        <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Delete Record</button>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- Toast Notification Container for user feedback -->
+  <div id="toastContainer" class="toast-container" aria-live="polite" aria-atomic="true"></div>
+
+  <!-- Page Footer -->
+  <footer class="app-footer">
+    <div class="footer-container">
+      <p><strong>EduTrack</strong> &copy; 2026 — Modern Student Registration Portal</p>
+      <p class="footer-note">All data is saved locally on your browser using HTML5 <code>localStorage</code>. No external server or tracking used.</p>
+    </div>
+  </footer>
+
+  <!-- JavaScript Modules (Loaded in dependency order) -->
+  <script src="js/storage.js"></script>
+  <script src="js/validation.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
